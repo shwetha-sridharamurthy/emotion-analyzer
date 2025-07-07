@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mood Predictor</title>
+</head>
+<body>
+  <h1>Mood Predictor</h1>
+  <input id="text" type="text" placeholder="Type your feelings..." />
+  <button onclick="analyze()">Analyze</button>
+  <div id="result"></div>
+
+  <script>
+    async function analyze() {
+      const text = document.getElementById("text").value;
+      const res = await fetch("https://emotion-analyzer-bi2k.onrender.com/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      document.getElementById("result").innerText = data.emotion ?
+        `Emotion: ${data.emotion} (Score: ${data.score})` :
+        "Error: " + data.error;
+    }
+  </script>
+</body>
+</html>

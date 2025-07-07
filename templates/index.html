@@ -12,12 +12,14 @@
   <script>
     async function analyze() {
       const text = document.getElementById("text").value;
-      const res = await fetch("https://emotion-analyzer-bi2k.onrender.com/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
-      const data = await res.json();
+const response = await fetch("https://emotion-analyzer-bi2k.onrender.com/predict", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ text: userInput })
+});
+      const data = await response.json();
       document.getElementById("result").innerText = data.emotion ?
         `Emotion: ${data.emotion} (Score: ${data.score})` :
         "Error: " + data.error;

@@ -1,18 +1,15 @@
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 import requests
 import os
 from dotenv import load_dotenv
 
-from flask_cors import CORS
-
-app = Flask(__name__)
-CORS(app)
-
 load_dotenv()
 
 app = Flask(__name__)
-HF_TOKEN = os.getenv("HF_TOKEN")
+CORS(app)  # ✅ enable CORS once and keep this app instance
 
+HF_TOKEN = os.getenv("HF_TOKEN")
 API_URL = "https://api-inference.huggingface.co/models/bhadresh-savani/distilbert-base-uncased-emotion"
 headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 

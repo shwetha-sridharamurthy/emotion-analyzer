@@ -1,45 +1,166 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mood Predictor</title>
+  <style>
+    :root {
+      --primary-color: #00bcd4;
+      --background-color: #121212;
+      --card-color: #1e1e1e;
+      --text-color: #e0e0e0;
+      --border-color: #333;
+      --accent-color: #03dac6;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      animation: fadeIn 1.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      background-color: var(--card-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 95%;
+      max-width: 460px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      animation: slideUp 0.9s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      height: 50px;
+      margin-bottom: 1rem;
+      filter: brightness(1.1);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--accent-color);
+      margin-bottom: 1.4rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 1.2rem;
+      background-color: #2a2a2a;
+      color: var(--text-color);
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    button {
+      padding: 0.75rem 2rem;
+      background-color: var(--primary-color);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #00acc1;
+      transform: scale(1.03);
+    }
+
+    #result {
+      margin-top: 1.5rem;
+      font-size: 1.15rem;
+      color: var(--text-color);
+      min-height: 24px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin: 0 1rem;
+        padding: 2rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Mood Predictor</h1>
-  <input id="text" type="text" placeholder="Type your feelings..." />
-  <button onclick="analyze()">Analyze</button>
-  <div id="result"></div>
+  <div class="container">
+    <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png" alt="Logo" />
+    <h1>Mood Predictor</h1>
+    <input id="text" type="text" placeholder="How are you feeling today?" />
+    <button onclick="analyze()">Analyze</button>
+    <div id="result"></div>
+  </div>
 
-<script>
-  async function analyze() {
-    const text = document.getElementById("text").value;
-    const resultDiv = document.getElementById("result");
+  <script>
+    async function analyze() {
+      const text = document.getElementById("text").value.trim();
+      const resultDiv = document.getElementById("result");
 
-    try {
-      const response = await fetch("https://emotion-analyzer-bi2k.onrender.com/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text: text })
-      });
-
-      if (!response.ok) {
-        throw new Error("Server returned " + response.status);
+      if (!text) {
+        resultDiv.innerText = "⚠️ Please enter a message.";
+        return;
       }
 
-      const data = await response.json();
+      resultDiv.innerText = "⏳ Analyzing...";
 
-      resultDiv.innerText = data.emotion
-        ? `Emotion: ${data.emotion} (Score: ${data.score})`
-        : "Error: " + (data.error || "Unknown issue");
+      try {
+        const response = await fetch("https://emotion-analyzer-bi2k.onrender.com/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: text })
+        });
 
-    } catch (err) {
-      resultDiv.innerText = "⚠️ Request failed: " + err.message;
-      console.error("Error fetching mood:", err);
+        if (!response.ok) throw new Error("Server error: " + response.status);
+
+        const data = await response.json();
+
+        const emojiMap = {
+          joy: "😊", sadness: "😢", anger: "😠",
+          fear: "😨", surprise: "😲", love: "❤️", neutral: "😐"
+        };
+
+        const emoji = emojiMap[data.emotion.toLowerCase()] || "🧠";
+
+        resultDiv.innerHTML = `<strong>${emoji} ${data.emotion}</strong> (Confidence: ${data.score})`;
+
+      } catch (err) {
+        resultDiv.innerText = "❌ Request failed: " + err.message;
+        console.error(err);
+      }
     }
-  }
-</script>
-
-
+  </script>
 </body>
 </html>
